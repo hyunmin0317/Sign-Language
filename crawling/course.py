@@ -8,8 +8,10 @@ def course():
 def main():
     URL = 'https://ecampus.smu.ac.kr/report/ubcompletion/user_progress.php?id=63139'
     html = requests.get(URL)
-    soup = BeautifulSoup(html.text, 'html.parser')
-    print(soup)
+    print(html.text)
+    print(html.url)
+    # soup = BeautifulSoup(html.text, 'html.parser')
+    # print(soup)
 
     # response = requests.post(URL).text
     # print(response)
