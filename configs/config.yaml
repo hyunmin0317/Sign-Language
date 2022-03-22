@@ -1,0 +1,61 @@
+DATASET:
+  DATA_ROOT: "/home/storage/sde_2T"
+  TRAIN:
+    IMG_PREFIX: "NIA_sen"
+    ANN_FILE: "KSL_TRAIN_QD_final.csv"
+
+  VAL:
+    IMG_PREFIX: "NIA_sen"
+    ANN_FILE: "KSL_VAL_QD_final.csv"
+
+  WORKER_PER_GPU: 16
+
+  TRANSFORM:
+    RESIZE_IMG: (256, 256)
+    TEMPORAL_SCALING: 1.0
+    CROP_SIZE: (224, 224)
+    TEMPORAL_CROP_RATIO: 0.0
+    MEAN: (0.0637, 0.0988, 0.2312)
+    STD: (0.0643, 0.0556, 0.1150)
+  VOCABULARY:
+    EXCLUDE_TOKENS:
+    - __ON__  #not used in ksl
+    - __OFF__
+
+SOLVER:
+  BATCH_PER_GPU: 2
+  BIAS_LR_FACTOR: 1.0
+
+  RAMPDOWN_ITERS: 0
+  BASE_LR: 1e-4
+  OPTIM_NAME: "Adam"
+  SGD:
+    MOMENTUM: 0.9
+    WEIGHT_DECAY: 0.0005
+    NESTEROV: true
+  ADAM:
+    BETA1: 0.9
+    BETA2: 0.999
+    EPS: 1.0e-08
+    WEIGHT_DECAY: 1e-4
+
+  LR_SCHEDULER_NAME: "WarmupMultiStepLR"
+  STEPS: (40, 60,)
+  GAMMA: 0.5
+  RAMPDOWN_ITERS: 0
+  WARMUP_FACTOR: 0
+  WARMUP_ITERS: 0
+  WARMUP_METHOD: "linear"
+PERIODS:
+  EVAL: 1
+  CHECKPOINT: 1
+  LOG_ITERS: 300
+OUTPUT_DIR: outputs/ksl
+RESUME: ""
+GPU_ID: 0
+NOTE: ""
+
+SEED: 33
+CUDNN_BENCHMARK: False
+CUDNN_DETERMINISTIC: True
+
