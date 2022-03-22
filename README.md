@@ -4,6 +4,20 @@
 
 ---
 
+## :book: 실행
+
+* Train
+    ```
+    python main.py --config-file configs/config.yaml
+    ```
+
+* Test
+    ```
+    python main.py --config-file configs/exp_test.yaml --eval-only
+    ```
+
+<br>
+
 ## :computer: 팀원 
 
 > **김범수** 
