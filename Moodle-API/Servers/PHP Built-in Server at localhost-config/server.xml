@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Server>
-	<Port name="HTTP/1.1" protocol="HTTP">8110</Port>
-<PathMapping local="/php" module="php" remote="C:\Users\choih\Desktop\SMU-Project\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\htdocs\php"/></Server>
