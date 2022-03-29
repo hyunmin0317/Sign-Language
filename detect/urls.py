@@ -6,10 +6,9 @@ from . import viewsml
 
 
 urlpatterns = [
+    path('', viewsml.home, name='home'),
     path('detectML', viewsml.detectML, name='detectML'),
     path('detectDL', viewsdl.detectDL, name='detectDL'),
-    path('home/', viewsml.home, name='home'),
-    path('ML/', viewsml.ML, name='ML'),    
+    path('ML/', viewsml.ML, name='ML'),
     path('DL/', viewsdl.DL, name='DL'),
-
 ]
