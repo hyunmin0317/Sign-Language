@@ -11,6 +11,8 @@
     pip install django
     pip install opencv-python
     pip install mediapipe
+    pip install pytorch
+    pip install hangul_utils
     ```
 
 * 서버 실행
