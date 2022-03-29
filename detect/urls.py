@@ -11,5 +11,5 @@ urlpatterns = [
     path('home/', viewsml.home, name='home'),
     path('ML/', viewsml.ML, name='ML'),    
     path('DL/', viewsdl.DL, name='DL'),
-    path('', viewsml.detectML, name='detectML'),
+
 ]
