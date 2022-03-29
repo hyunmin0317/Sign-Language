@@ -68,75 +68,76 @@ class VideoCamera(object):
         sentence = ''
         recognizeDelay = 0.1    
 
-        image = self.frame
-        video = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        video = cv2.flip(video, 1)
-
-        video.flags.writeable = False
-
-        result = hands.process(video)
-        
-        video.flags.writeable = True
-        video = cv2.cvtColor(video, cv2.COLOR_RGB2BGR)
-        
-        # if result.multi_hand_landmarks:
+        video = self.frame
+        # image = self.frame
+        # video = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        # video = cv2.flip(video, 1)
+        #
+        # video.flags.writeable = False
+        #
+        # result = hands.process(video)
+        #
+        # video.flags.writeable = True
+        # video = cv2.cvtColor(video, cv2.COLOR_RGB2BGR)
+        #
+        # # if result.multi_hand_landmarks:
+        # #     for res in result.multi_hand_landmarks:
+        # #         joint = np.zeros((21, 3))
+        # #         for j,lm in enumerate(res.landmark):
+        # #             joint[j] = [lm.x, lm.y, lm.z]
+        # if result.multi_hand_landmarks is not None:      # 손 인식 했을 경우
         #     for res in result.multi_hand_landmarks:
-        #         joint = np.zeros((21, 3)) 
+        #         joint = np.zeros((21, 3))                 # 21개의 마디 부분 좌표 (x, y, z)를 joint에 저장
         #         for j,lm in enumerate(res.landmark):
         #             joint[j] = [lm.x, lm.y, lm.z]
-        if result.multi_hand_landmarks is not None:      # 손 인식 했을 경우
-            for res in result.multi_hand_landmarks:
-                joint = np.zeros((21, 3))                 # 21개의 마디 부분 좌표 (x, y, z)를 joint에 저장
-                for j,lm in enumerate(res.landmark):
-                    joint[j] = [lm.x, lm.y, lm.z]
-                # 벡터 계산
-                v1 = joint[[0, 1, 2, 3, 0, 5, 6, 7, 0, 9, 10, 11, 0, 13, 14, 15, 0, 17, 18, 19],:]
-                v2 = joint[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],:]
-                v = v2 - v1
-
-                # 벡터 길이 계산 (Normalize v)
-                v = v / np.linalg.norm(v, axis=1)[:, np.newaxis]
-
-                # arcos을 이용하여 15개의 angle 구하기
-                angle = np.arccos(np.einsum('nt,nt->n',
-                                            v[[0, 1, 2, 4, 5, 6, 8, 9, 10, 12, 13, 14, 16, 17, 18],:],
-                                            v[[1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15, 17, 18, 19],:]))
-
-                angle = np.degrees(angle)  # radian 값을 degree로 변경
-
-                data = np.array([angle], dtype=np.float32)
-
-                ret, results,neighbours,dist = knn.findNearest(data,3)
-                index = int(results[0][0])
-
-                if index in gesture.keys():
-                    if time.time() - self.startTime > 3:
-                        self.startTime = time.time()
-                                # 다 지우기
-                        if index == 7:
-                            sum.clear()
-                        elif index == 8:
-                            # sentence = ''
-                            # #sum.append(gesture[index])
-                            sum.clear()
-                        else:
-                            sum.append(gesture[index]) #인식된 단어 리스트에 추가..
-                        startTime = time.time()
-                        
-                    cv2.putText(video,gesture_en[index].upper(),(int(res.landmark[0].x * video.shape[1] - 10),int(res.landmark[0].y * video.shape[0] + 40)),cv2.FONT_HERSHEY_SIMPLEX, 1,(255,255,255),3)
-
-                mp_drawing.draw_landmarks(video,res,mp_hands.HAND_CONNECTIONS)
-
-        video = Image.fromarray(video)
-        draw = ImageDraw.Draw(video)
-        for i in sum:
-            if i in sentence:
-                pass
-            else:
-                sentence += " "
-                sentence += i
-            
-        draw.text(xy=(20, 440), text = sentence, font=font, fill=(255, 255, 255))
+        #         # 벡터 계산
+        #         v1 = joint[[0, 1, 2, 3, 0, 5, 6, 7, 0, 9, 10, 11, 0, 13, 14, 15, 0, 17, 18, 19],:]
+        #         v2 = joint[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],:]
+        #         v = v2 - v1
+        #
+        #         # 벡터 길이 계산 (Normalize v)
+        #         v = v / np.linalg.norm(v, axis=1)[:, np.newaxis]
+        #
+        #         # arcos을 이용하여 15개의 angle 구하기
+        #         angle = np.arccos(np.einsum('nt,nt->n',
+        #                                     v[[0, 1, 2, 4, 5, 6, 8, 9, 10, 12, 13, 14, 16, 17, 18],:],
+        #                                     v[[1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15, 17, 18, 19],:]))
+        #
+        #         angle = np.degrees(angle)  # radian 값을 degree로 변경
+        #
+        #         data = np.array([angle], dtype=np.float32)
+        #
+        #         ret, results,neighbours,dist = knn.findNearest(data,3)
+        #         index = int(results[0][0])
+        #
+        #         if index in gesture.keys():
+        #             if time.time() - self.startTime > 3:
+        #                 self.startTime = time.time()
+        #                         # 다 지우기
+        #                 if index == 7:
+        #                     sum.clear()
+        #                 elif index == 8:
+        #                     # sentence = ''
+        #                     # #sum.append(gesture[index])
+        #                     sum.clear()
+        #                 else:
+        #                     sum.append(gesture[index]) #인식된 단어 리스트에 추가..
+        #                 startTime = time.time()
+        #
+        #             cv2.putText(video,gesture_en[index].upper(),(int(res.landmark[0].x * video.shape[1] - 10),int(res.landmark[0].y * video.shape[0] + 40)),cv2.FONT_HERSHEY_SIMPLEX, 1,(255,255,255),3)
+        #
+        #         mp_drawing.draw_landmarks(video,res,mp_hands.HAND_CONNECTIONS)
+        #
+        # video = Image.fromarray(video)
+        # draw = ImageDraw.Draw(video)
+        # for i in sum:
+        #     if i in sentence:
+        #         pass
+        #     else:
+        #         sentence += " "
+        #         sentence += i
+        #
+        # draw.text(xy=(20, 440), text = sentence, font=font, fill=(255, 255, 255))
         
         video = np.array(video)
         
