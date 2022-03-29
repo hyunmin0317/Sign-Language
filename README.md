@@ -6,14 +6,16 @@
 
 ## :book: 실행
 
-* Train
+* 패키지 설치
     ```
-    python main.py --config-file configs/config.yaml
+    pip install django
+    pip install opencv-python
+    pip install mediapipe
     ```
 
-* Test
+* 서버 실행
     ```
-    python main.py --config-file configs/exp_test.yaml --eval-only
+    python manage.py runserver
     ```
 
 <br>
