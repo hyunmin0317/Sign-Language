@@ -4,24 +4,6 @@
 
 ---
 
-## :book: 실행
-
-* 패키지 설치
-    ```
-    pip install django
-    pip install opencv-python
-    pip install mediapipe
-    pip install pytorch
-    pip install hangul_utils
-    ```
-
-* 서버 실행
-    ```
-    python manage.py runserver
-    ```
-
-<br>
-
 ## :computer: 팀원 
 
 > **김범수** 
