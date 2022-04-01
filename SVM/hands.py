@@ -17,7 +17,7 @@ gesture = {
 
 startTime = time.time()
 sentence = ''
-pkl_file = 'model_hands.pkl'
+pkl_file = 'SVM.pkl'
 estimator = joblib.load(pkl_file)
 
 # For webcam input:
@@ -75,19 +75,17 @@ with mp_holistic.Holistic(
                                         v[[1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15, 17, 18, 19], :]))
             angle = np.degrees(angle)  # radian 값을 degree로 변경
             angles += angle.tolist()
-        index = estimator.predict([angles])
-        print(index)
+        index = estimator.predict([angles])[0]
 
-        #
-        # if index in gesture.keys():
-        #     if time.time() - startTime > 3:
-        #         startTime = time.time()
-        #         # 다 지우기
-        #         if index == -1:
-        #             sum.clear()
-        #         else:
-        #             sum.append(gesture[index])  # 인식된 단어 리스트에 추가..
-        #         startTime = time.time()
+        if index in gesture.keys():
+            if time.time() - startTime > 3:
+                startTime = time.time()
+                # 다 지우기
+                if index == -1:
+                    sum.clear()
+                else:
+                    sum.append(gesture[index])  # 인식된 단어 리스트에 추가..
+                startTime = time.time()
 
         for i in sum:
             if i in sentence:
