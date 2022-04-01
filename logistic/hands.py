@@ -1,62 +1,113 @@
-import pandas as pd
-from sklearn.preprocessing import LabelEncoder
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
+import time
+import cv2
+import joblib
+import mediapipe as mp
 import numpy as np
+from PIL import ImageFont, ImageDraw, Image
 
-##########데이터 로드
+mp_drawing = mp.solutions.drawing_utils
+mp_drawing_styles = mp.solutions.drawing_styles
+mp_holistic = mp.solutions.holistic
 
-df = pd.read_csv('hands.csv')
+sum = []
+font = ImageFont.truetype("SCDream6.otf", 25)
+gesture = {
+    0: "지우기", 1: "안녕하세요.", 2: "감사합니다."
+}
 
-##########데이터 분석
+startTime = time.time()
+sentence = ''
+pkl_file = 'Logistic.pkl'
+estimator = joblib.load(pkl_file)
 
-##########데이터 전처리
+# For webcam input:
+cap = cv2.VideoCapture(0)
+with mp_holistic.Holistic(
+    min_detection_confidence=0.5,
+    min_tracking_confidence=0.5) as holistic:
+  while cap.isOpened():
+    success, image = cap.read()
+    if not success:
+      print("Ignoring empty camera frame.")
+      # If loading a video, use 'break' instead of 'continue'.
+      continue
 
-x_data = df.drop(['W'], axis=1)
-y_data = df['W']
+    # To improve performance, optionally mark the image as not writeable to
+    # pass by reference.
+    image.flags.writeable = False
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    results = holistic.process(image)
 
-print(x_data.head())
-'''
-    SepalLengthCm  SepalWidthCm  PetalLengthCm  PetalWidthCm
-28            5.2           3.4            1.4           0.2
-91            6.1           3.0            4.6           1.4
-41            4.5           2.3            1.3           0.3
-45            4.8           3.0            1.4           0.3
-57            4.9           2.4            3.3           1.0
-'''
+    # Draw the hand annotations on the image.
+    image.flags.writeable = True
+    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
-le = LabelEncoder()
-le.fit(y_data)
-print(le.classes_) #['Iris-setosa' 'Iris-versicolor' 'Iris-virginica']
-#labels = le.classes_
-# labels = ['세토사', '버시칼라', '버지니카']
-y_data = le.transform(y_data)
+    # Face
+    mp_drawing.draw_landmarks(image, results.face_landmarks, mp_holistic.FACEMESH_CONTOURS, landmark_drawing_spec=None, connection_drawing_spec=mp_drawing_styles.get_default_face_mesh_contours_style())
+    mp_drawing.draw_landmarks(image, results.face_landmarks, mp_holistic.FACEMESH_TESSELATION, landmark_drawing_spec=None, connection_drawing_spec=mp_drawing_styles.get_default_face_mesh_tesselation_style())
 
-x_train, x_test, y_train, y_test = train_test_split(x_data, y_data, test_size=0.3, random_state=10000, stratify=y_data)
+    # Pose
+    mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_holistic.POSE_CONNECTIONS, landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
 
-##########모델 생성
+    # Hand
+    mp_drawing.draw_landmarks(image, results.right_hand_landmarks, mp_holistic.HAND_CONNECTIONS, landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
+    mp_drawing.draw_landmarks(image, results.left_hand_landmarks, mp_holistic.HAND_CONNECTIONS, landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
 
-model = LogisticRegression(max_iter=10000)
+    # 수어 판별
+    if results.right_hand_landmarks and results.left_hand_landmarks:
+        angles = []
+        multi_hand_landmarks = [results.right_hand_landmarks, results.left_hand_landmarks]
+        for hand_landmarks in multi_hand_landmarks:
+            joint = np.zeros((21, 3))  # 21개의 마디 부분 좌표 (x, y, z)를 joint에 저장
+            for j, lm in enumerate(hand_landmarks.landmark):
+                joint[j] = [lm.x, lm.y, lm.z]
+            # 벡터 계산
+            v1 = joint[[0, 1, 2, 3, 0, 5, 6, 7, 0, 9, 10, 11, 0, 13, 14, 15, 0, 17, 18, 19], :]
+            v2 = joint[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], :]
+            v = v2 - v1
 
-##########모델 학습
+            # 벡터 길이 계산 (Normalize v)
+            v = v / np.linalg.norm(v, axis=1)[:, np.newaxis]
 
-model.fit(x_train, y_train)
+            # arcos을 이용하여 15개의 angle 구하기
+            angle = np.arccos(np.einsum('nt,nt->n',
+                                        v[[0, 1, 2, 4, 5, 6, 8, 9, 10, 12, 13, 14, 16, 17, 18], :],
+                                        v[[1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15, 17, 18, 19], :]))
+            angle = np.degrees(angle)  # radian 값을 degree로 변경
+            angles += angle.tolist()
+        index = estimator.predict([angles])[0]
 
-##########모델 검증
+        if index in gesture.keys():
+            if time.time() - startTime > 3:
+                startTime = time.time()
+                # 다 지우기
+                if index == -1:
+                    sum.clear()
+                else:
+                    sum.append(gesture[index])  # 인식된 단어 리스트에 추가..
+                startTime = time.time()
 
-print(model.score(x_train, y_train)) #
+        for i in sum:
+            if i in sentence:
+                pass
+            else:
+                sentence += " "
+                sentence += i
 
-print(model.score(x_test, y_test)) #0.9777777777777777
+    else:
+        if results.right_hand_landmarks is None and results.left_hand_landmarks is None:
+            if sentence != '':
+                print(sentence)
+            sentence = ''
+            sum.clear()
 
-##########모델 예측
+    image = Image.fromarray(image)
+    draw = ImageDraw.Draw(image)
+    draw.text(xy=(20, 440), text=sentence, font=font, fill=(255, 255, 255))
+    image = np.array(image)
 
-# x_test = np.array([
-#     [5.3, 3.7, 1.5, 0.2]
-# ])
-#
-# y_predict = model.predict(x_test)
-# label = labels[y_predict[0]]
-# y_predict = model.predict_proba(x_test)
-# confidence = y_predict[0][y_predict[0].argmax()]
-#
-# print(label, confidence) #
+    # Flip the image horizontally for a selfie-view display.
+    cv2.imshow('MediaPipe Holistic', image)
+    if cv2.waitKey(5) & 0xFF == 27:
+      break
+cap.release()
