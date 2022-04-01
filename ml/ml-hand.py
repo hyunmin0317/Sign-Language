@@ -69,6 +69,7 @@ with mp_hands.Hands(
         angle = np.degrees(angle)  # radian 값을 degree로 변경
 
         data = np.array([angle], dtype=np.float32)
+        print(data)
 
         ret, results, neighbours, dist = knn.findNearest(data, 3)
         index = int(results[0][0])
