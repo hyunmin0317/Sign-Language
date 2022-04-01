@@ -38,10 +38,24 @@ with mp_holistic.Holistic(
     # Draw the hand annotations on the image.
     image.flags.writeable = True
     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-    if results.right_hand_landmarks:
-      for hand_landmarks in results.right_hand_landmarks:
+
+    # Face
+    mp_drawing.draw_landmarks(image, results.face_landmarks, mp_holistic.FACEMESH_CONTOURS, landmark_drawing_spec=None, connection_drawing_spec=mp_drawing_styles.get_default_face_mesh_contours_style())
+    mp_drawing.draw_landmarks(image, results.face_landmarks, mp_holistic.FACEMESH_TESSELATION, landmark_drawing_spec=None, connection_drawing_spec=mp_drawing_styles.get_default_face_mesh_tesselation_style())
+
+    # Pose
+    mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_holistic.POSE_CONNECTIONS, landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
+
+    # Hand
+    mp_drawing.draw_landmarks(image, results.right_hand_landmarks, mp_holistic.HAND_CONNECTIONS, landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
+    mp_drawing.draw_landmarks(image, results.left_hand_landmarks, mp_holistic.HAND_CONNECTIONS, landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
+
+    # 수어 판별
+    multi_hand_landmarks = [results.right_hand_landmarks, results.left_hand_landmarks]
+    for hand_landmarks in multi_hand_landmarks:
+      if hand_landmarks:
         joint = np.zeros((21, 4))  # 21개의 마디 부분 좌표 (x, y, z)를 joint에 저장
-        for j, lm in enumerate(results.right_hand_landmarks.landmark):
+        for j, lm in enumerate(hand_landmarks.landmark):
             joint[j] = [lm.x, lm.y, lm.z, lm.visibility]
         # 벡터 계산
         v1 = joint[[0, 1, 2, 3, 0, 5, 6, 7, 0, 9, 10, 11, 0, 13, 14, 15, 0, 17, 18, 19], :3]  # Parent joint
@@ -60,13 +74,6 @@ with mp_holistic.Holistic(
 
         d = np.concatenate([joint.flatten(), angle])
         seq.append(d)
-
-        mp_drawing.draw_landmarks(
-            image,
-            hand_landmarks,
-            mp_hands.HAND_CONNECTIONS,
-            mp_drawing_styles.get_default_hand_landmarks_style(),
-            mp_drawing_styles.get_default_hand_connections_style())
 
         if len(seq) < seq_length:
             continue
@@ -108,7 +115,7 @@ with mp_holistic.Holistic(
             else:
                 content += i
                 content += " "
-                print(content)
+                # print(content)
         image = Image.fromarray(image)
         draw = ImageDraw.Draw(image)
         draw.text(xy=(10,30), text=content, font = font, fill=(255,255,255))

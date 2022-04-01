@@ -1,5 +1,6 @@
 import cv2
 import mediapipe as mp
+
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_holistic = mp.solutions.holistic
@@ -36,6 +37,10 @@ with mp_holistic.Holistic(
     # Hand
     mp_drawing.draw_landmarks(image,results.right_hand_landmarks,mp_holistic.HAND_CONNECTIONS,landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
     mp_drawing.draw_landmarks(image,results.left_hand_landmarks,mp_holistic.HAND_CONNECTIONS,landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
+
+    if results.right_hand_landmarks:
+      for j, lm in enumerate(results.right_hand_landmarks.landmark):
+        print(j)
 
     # Flip the image horizontally for a selfie-view display.
     cv2.imshow('MediaPipe Holistic', cv2.flip(image, 1))
