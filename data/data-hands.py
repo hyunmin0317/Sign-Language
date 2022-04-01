@@ -3,11 +3,11 @@ import cv2
 import mediapipe as mp
 import numpy as np
 
-name = "미안합니다"
+name = "감사합니다"
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_holistic = mp.solutions.holistic
-fp = open('./csv/'+name+'.csv','w', newline='')
+fp = open('./csv/hands/'+name+'.csv','w', newline='')
 wr = csv.writer(fp)
 
 # For webcam input:

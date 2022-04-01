@@ -7,7 +7,7 @@ name = "안녕하세요"
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_holistic = mp.solutions.holistic
-fp = open('./csv/'+name+'.csv','w', newline='')
+fp = open('./csv/hand/'+name+'.csv','w', newline='')
 wr = csv.writer(fp)
 
 # For webcam input:
