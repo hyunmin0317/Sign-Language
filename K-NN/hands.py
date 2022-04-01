@@ -11,7 +11,7 @@ mp_holistic = mp.solutions.holistic
 sum = []
 font = ImageFont.truetype("SCDream6.otf", 25)
 gesture = {
-    -1: "지우기", 0: "안녕하세요."
+    -1: "지우기", 0: "안녕하세요.", 1: "감사합니다."
 }
 
 startTime = time.time()
@@ -97,14 +97,21 @@ with mp_holistic.Holistic(
             else:
                 sentence += " "
                 sentence += i
+
+    else:
+        if results.right_hand_landmarks is None and results.left_hand_landmarks is None:
+            if sentence != '':
                 print(sentence)
-        image = Image.fromarray(image)
-        draw = ImageDraw.Draw(image)
-        draw.text(xy=(20, 440), text=sentence, font=font, fill=(255, 255, 255))
-        image = np.array(image)
+            sentence = ''
+            sum.clear()
+
+    image = Image.fromarray(image)
+    draw = ImageDraw.Draw(image)
+    draw.text(xy=(20, 440), text=sentence, font=font, fill=(255, 255, 255))
+    image = np.array(image)
 
     # Flip the image horizontally for a selfie-view display.
-    cv2.imshow('MediaPipe Hands', image)
+    cv2.imshow('MediaPipe Holistic', image)
     if cv2.waitKey(5) & 0xFF == 27:
       break
 cap.release()

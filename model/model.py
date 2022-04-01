@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 
 #데이터 불러오기
-data = pd.read_csv("data.csv")
+data = pd.read_csv("hands.csv")
 col = list(map(str,data.columns))
 x = data[col[:-1]]
 print(x)
@@ -59,4 +59,4 @@ plt.show()
 #model 저장
 import joblib
 best_model = grid.best_estimator_
-joblib.dump(best_model,'./model.pkl')
+joblib.dump(best_model,'./model_hands.pkl')
