@@ -81,6 +81,7 @@ with mp_holistic.Holistic(
         input_data = np.expand_dims(np.array(seq[-seq_length:], dtype=np.float32), axis=0)
         # 인퍼런스 한 결과를 뽑아낸다
         y_pred = model.predict(input_data).squeeze()
+        print(y_pred)
         # 어떠한 인덱스 인지 뽑아낸다
         i_pred = int(np.argmax(y_pred))
         conf = y_pred[i_pred]
