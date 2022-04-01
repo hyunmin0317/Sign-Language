@@ -3,7 +3,7 @@ import cv2
 import mediapipe as mp
 import numpy as np
 
-name = "안녕하세요"
+name = "미안합니다"
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_holistic = mp.solutions.holistic
@@ -48,9 +48,10 @@ with mp_holistic.Holistic(
     mp_drawing.draw_landmarks(image, results.left_hand_landmarks, mp_holistic.HAND_CONNECTIONS, landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
 
     # 수어 판별
-    multi_hand_landmarks = [results.right_hand_landmarks, results.left_hand_landmarks]
-    for hand_landmarks in multi_hand_landmarks:
-      if hand_landmarks:
+    if results.right_hand_landmarks and results.left_hand_landmarks:
+      hand = []
+      multi_hand_landmarks = [results.right_hand_landmarks, results.left_hand_landmarks]
+      for hand_landmarks in multi_hand_landmarks:
         joint = np.zeros((21, 3))  # 21개의 마디 부분 좌표 (x, y, z)를 joint에 저장
         for j, lm in enumerate(hand_landmarks.landmark):
             joint[j] = [lm.x, lm.y, lm.z]
@@ -67,7 +68,8 @@ with mp_holistic.Holistic(
                                     v[[0, 1, 2, 4, 5, 6, 8, 9, 10, 12, 13, 14, 16, 17, 18], :],
                                     v[[1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15, 17, 18, 19], :]))
         angle = np.degrees(angle)  # radian 값을 degree로 변경
-        data.append(angle.tolist())
+        hand += angle.tolist()
+      data.append(hand)
     # Flip the image horizontally for a selfie-view display.
     cv2.imshow('MediaPipe Holistic', image)
     if cv2.waitKey(5) & 0xFF == 27:

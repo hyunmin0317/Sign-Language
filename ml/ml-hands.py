@@ -11,7 +11,7 @@ mp_holistic = mp.solutions.holistic
 sum = []
 font = ImageFont.truetype("SCDream6.otf", 25)
 gesture = {
-    -1: "지우기", 0: "감사합니다.", 1: "괜찮습니다.", 2: "미안합니다.", 3: "안녕하세요."
+    -1: "지우기", 0: "안녕하세요."
 }
 
 startTime = time.time()
