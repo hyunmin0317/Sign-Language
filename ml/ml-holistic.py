@@ -1,21 +1,29 @@
+import time
 import cv2
 import mediapipe as mp
 import numpy as np
 from PIL import ImageFont, ImageDraw, Image
-from tensorflow.python.keras.models import load_model
 
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_holistic = mp.solutions.holistic
 
-actions = ['지금', '까지', '3조', '발표', '들어주셔서', '감사합니다', '삭제']
-seq_length = 30
-model = load_model('testmodel.h5')
+sum = []
+font = ImageFont.truetype("SCDream6.otf", 25)
+gesture = {
+    0: "자세히", 1: "보아야", 2: "예쁘다", 3: "오래", 4: "사랑스럽다", 5: "너도", 6: "그렇다", 7: "지우기"
+}
+gesture_en = {
+    0: "detail", 1: "see", 2: "beautiful", 3: "long", 4: "lovely", 5: "you", 6: "sodo", 7: "del"
+}
 
-seq = []
-action_seq = []
-word = []
-font = ImageFont.truetype('SCDream6.otf', 20)
+startTime = time.time()
+sentence = ''
+file = np.genfromtxt('worddata.csv', delimiter=',')
+angle = file[:, :-1].astype(np.float32)
+label = file[:, -1].astype(np.float32)
+knn = cv2.ml.KNearest_create()  ## K-NN 알고리즘 객체 생성
+knn.train(angle, cv2.ml.ROW_SAMPLE, label)  ## train, 행 단위 샘플
 
 # For webcam input:
 cap = cv2.VideoCapture(0)
@@ -54,12 +62,12 @@ with mp_holistic.Holistic(
     multi_hand_landmarks = [results.right_hand_landmarks, results.left_hand_landmarks]
     for hand_landmarks in multi_hand_landmarks:
       if hand_landmarks:
-        joint = np.zeros((21, 4))  # 21개의 마디 부분 좌표 (x, y, z)를 joint에 저장
+        joint = np.zeros((21, 3))  # 21개의 마디 부분 좌표 (x, y, z)를 joint에 저장
         for j, lm in enumerate(hand_landmarks.landmark):
-            joint[j] = [lm.x, lm.y, lm.z, lm.visibility]
+            joint[j] = [lm.x, lm.y, lm.z]
         # 벡터 계산
-        v1 = joint[[0, 1, 2, 3, 0, 5, 6, 7, 0, 9, 10, 11, 0, 13, 14, 15, 0, 17, 18, 19], :3]  # Parent joint
-        v2 = joint[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], :3]  # Child joint
+        v1 = joint[[0, 1, 2, 3, 0, 5, 6, 7, 0, 9, 10, 11, 0, 13, 14, 15, 0, 17, 18, 19], :]
+        v2 = joint[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], :]
         v = v2 - v1
 
         # 벡터 길이 계산 (Normalize v)
@@ -72,55 +80,42 @@ with mp_holistic.Holistic(
 
         angle = np.degrees(angle)  # radian 값을 degree로 변경
 
-        d = np.concatenate([joint.flatten(), angle])
-        seq.append(d)
+        data = np.array([angle], dtype=np.float32)
 
-        if len(seq) < seq_length:
-            continue
+        ret, results, neighbours, dist = knn.findNearest(data, 3)
+        index = int(results[0][0])
 
-        input_data = np.expand_dims(np.array(seq[-seq_length:], dtype=np.float32), axis=0)
-        # 인퍼런스 한 결과를 뽑아낸다
-        y_pred = model.predict(input_data).squeeze()
-        # 어떠한 인덱스 인지 뽑아낸다
-        i_pred = int(np.argmax(y_pred))
-        conf = y_pred[i_pred]
-        # confidence 가 90%이하이면 액션을 취하지 않았다 판단
-        if conf < 0.9:
-            continue
+        if index in gesture.keys():
+            if time.time() - startTime > 3:
+                startTime = time.time()
+                # 다 지우기
+                if index == 7:
+                    sum.clear()
+                elif index == 8:
+                    # sentence = ''
+                    # #sum.append(gesture[index])
+                    sum.clear()
+                else:
+                    sum.append(gesture[index])  # 인식된 단어 리스트에 추가..
+                startTime = time.time()
 
-        action = actions[i_pred]
-        action_seq.append(action)
+            cv2.putText(image, gesture_en[index].upper(), (
+                int(hand_landmarks.landmark[0].x * image.shape[1] - 10), int(hand_landmarks.landmark[0].y * image.shape[0] + 40)),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 3)
 
-        if len(action_seq) < 7:
-            continue
-
-        # 마지막 3번 반복되었을 때 진짜로 판단
-        #this_action = '?'
-        if action_seq[-1] == action_seq[-2] == action_seq[-3]:
-            #this_action = action
-
-            if action == '삭제':
-                word.clear()
-            else:
-                word.append(action)
-        image = Image.fromarray(image)
-        draw = ImageDraw.Draw(image)
-
-        draw.text(xy=(int(hand_landmarks.landmark[0].x*640), int(hand_landmarks.landmark[0].y*480 + 20)), text=action, font = font, fill=(255,255,255))
-        image = np.array(image)
-        content = ''
-        for i in word:
-            if i in content:
+        for i in sum:
+            if i in sentence:
                 pass
             else:
-                content += i
-                content += " "
-                print(content)
+                sentence += " "
+                sentence += i
+                print(sentence)
         image = Image.fromarray(image)
         draw = ImageDraw.Draw(image)
-        draw.text(xy=(10,30), text=content, font = font, fill=(255,255,255))
+        draw.text(xy=(20, 440), text=sentence, font=font, fill=(255, 255, 255))
         image = np.array(image)
 
+    # Flip the image horizontally for a selfie-view display.
     cv2.imshow('MediaPipe Hands', image)
     if cv2.waitKey(5) & 0xFF == 27:
       break
