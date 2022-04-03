@@ -49,7 +49,7 @@ print(model.score(x_train, y_train)) #
 print(model.score(x_test, y_test)) #0.9777777777777777
 
 # 모델 저장
-joblib.dump(model,'./Logistic.pkl')
+joblib.dump(model, 'Logistic.pkl')
 ##########모델 예측
 
 # x_test = np.array([
