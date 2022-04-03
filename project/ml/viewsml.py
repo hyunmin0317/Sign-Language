@@ -29,7 +29,7 @@ hands = mp_hands.Hands(max_num_hands=max_num_hands,
                        min_detection_confidence=0.7,
                        min_tracking_confidence=0.7)
 
-file = np.genfromtxt('./data/worddata.csv', delimiter=',')
+file = np.genfromtxt('./dataset/worddata.csv', delimiter=',')
 angle = file[:, :-1].astype(np.float32)
 label = file[:, -1].astype(np.float32)
 

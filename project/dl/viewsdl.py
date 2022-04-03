@@ -13,7 +13,7 @@ import time
 actions = ['지금', '까지', '3조', '발표', '들어주셔서', '감사합니다', '삭제']
 seq_length = 30
 
-model = load_model('./data/testmodel.h5')
+model = load_model('./dataset/testmodel.h5')
 # MediaPipe hands model
 mp_hands = mp.solutions.hands
 mp_drawing = mp.solutions.drawing_utils

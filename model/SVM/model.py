@@ -24,7 +24,7 @@ pipe = Pipeline([('scaler', scaler), ('base_model', base_model)])
 
 
 
-# data split
+# dataset split
 X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=1)
 
 # grid search을 통한 svm 파라미터 결정시 필요한 요소 설정
