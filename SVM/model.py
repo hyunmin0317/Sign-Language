@@ -59,4 +59,4 @@ plt.show()
 #model 저장
 import joblib
 best_model = grid.best_estimator_
-joblib.dump(best_model,'./SVM.pkl')
+joblib.dump(best_model, 'SVM.pkl')
