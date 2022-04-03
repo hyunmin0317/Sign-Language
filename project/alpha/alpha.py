@@ -9,13 +9,13 @@ mp_drawing_styles = mp.solutions.drawing_styles
 mp_hands = mp.solutions.hands
 
 gesture = {
-    0:'a', 1:'b', 2:'c', 3:'d', 4:'e', 5:'f', 6:'g', 7:'h',
-    8:'i', 9:'j', 10:'k', 11:'l', 12:'m', 13:'n', 14:'o',
-    15:'p', 16:'q', 17:'r', 18:'s', 19:'t', 20:'u', 21:'v',
-    22:'w', 23:'x', 24:'y', 25:'z', 26:'spacing', 27:'clear'
+    1:'a', 2:'b', 3:'c', 4:'d', 5:'e', 6:'f', 7:'g', 8:'h',
+    9:'i', 10:'j', 11:'k', 12:'l', 13:'m', 14:'n', 15:'o',
+    16:'p', 17:'q', 18:'r', 19:'s', 20:'t', 21:'u', 22:'v',
+    23:'w', 24:'x', 25:'y', 26:'z', 27:'spacing', 28:'clear'
 }
 
-file = np.genfromtxt('data.txt', delimiter=',')
+file = np.genfromtxt('dataset.csv', delimiter=',')
 angle = file[:, :-1].astype(np.float32)
 label = file[:, -1].astype(np.float32)
 knn = cv2.ml.KNearest_create()  ## K-NN 알고리즘 객체 생성
@@ -80,9 +80,10 @@ with mp_hands.Hands(
                 prev_index = index
             else:
                 if time.time() - startTime > recognizeDelay:
-                    if index == 26:
+                    if index == 27:
                         sentence += ' '
-                    elif index == 27:
+                    elif index == 28:
+                        print(sentence)
                         sentence = ''
                     else:
                         sentence += gesture[index]
