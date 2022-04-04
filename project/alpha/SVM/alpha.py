@@ -1,8 +1,8 @@
 import time
 import cv2
+import joblib
 import mediapipe as mp
 import numpy as np
-from PIL import ImageFont, ImageDraw, Image
 
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
@@ -15,11 +15,8 @@ gesture = {
     23:'w', 24:'x', 25:'y', 26:'z', 27:'spacing', 28:'clear'
 }
 
-file = np.genfromtxt('dataset.csv', delimiter=',')
-angle = file[:, :-1].astype(np.float32)
-label = file[:, -1].astype(np.float32)
-knn = cv2.ml.KNearest_create()  ## K-NN 알고리즘 객체 생성
-knn.train(angle, cv2.ml.ROW_SAMPLE, label)  ## train, 행 단위 샘플
+pkl_file = 'SVM.pkl'
+estimator = joblib.load(pkl_file)
 
 startTime = time.time()
 prev_index = 0
@@ -51,6 +48,7 @@ with mp_hands.Hands(
 
     # 수어 판별
     if results.multi_hand_landmarks:
+      angles = []
       for hand_landmarks in results.multi_hand_landmarks:
         # 21개의 마디 부분 좌표 (x, y, z)를 joint에 저장
         joint = np.zeros((21, 3))
@@ -70,9 +68,9 @@ with mp_hands.Hands(
                                     v[[1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15, 17, 18, 19], :]))
 
         angle = np.degrees(angle)  # radian 값을 degree로 변경
-        data = np.array([angle], dtype=np.float32)
-        ret, results, neighbours, dist = knn.findNearest(data, 3)
-        index = int(results[0][0])
+        angles += angle.tolist()
+        index = estimator.predict([angles])[0]
+        print(gesture[index])
 
         if index in gesture.keys():
             if index != prev_index:

@@ -1,8 +1,8 @@
 import time
 import cv2
-import joblib
 import mediapipe as mp
 import numpy as np
+from PIL import ImageFont, ImageDraw, Image
 
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
@@ -15,8 +15,11 @@ gesture = {
     23:'w', 24:'x', 25:'y', 26:'z', 27:'spacing', 28:'clear'
 }
 
-pkl_file = 'SVM.pkl'
-estimator = joblib.load(pkl_file)
+file = np.genfromtxt('dataset.csv', delimiter=',')
+angle = file[:, :-1].astype(np.float32)
+label = file[:, -1].astype(np.float32)
+knn = cv2.ml.KNearest_create()  ## K-NN 알고리즘 객체 생성
+knn.train(angle, cv2.ml.ROW_SAMPLE, label)  ## train, 행 단위 샘플
 
 startTime = time.time()
 prev_index = 0
