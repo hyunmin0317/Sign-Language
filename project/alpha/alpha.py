@@ -94,7 +94,7 @@ with mp_hands.Hands(
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 3)
         # Draw
         mp_drawing.draw_landmarks(image, hand_landmarks, mp_hands.HAND_CONNECTIONS, mp_drawing_styles.get_default_hand_landmarks_style(), mp_drawing_styles.get_default_hand_connections_style())
-        cv2.putText(image, sentence, (20, 440), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 3)
+    cv2.putText(image, sentence, (20, 440), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 3)
 
     # Flip the image horizontally for a selfie-view display.
     cv2.imshow('Hand Tracking', image)
