@@ -6,7 +6,7 @@ import numpy as np
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_hands = mp.solutions.hands
-name = "3"
+name = "12"
 fp = open('./csv/'+name+'.csv','w', newline='')
 wr = csv.writer(fp)
 data = []
