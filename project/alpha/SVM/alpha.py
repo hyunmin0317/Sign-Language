@@ -70,7 +70,6 @@ with mp_hands.Hands(
         angle = np.degrees(angle)  # radian 값을 degree로 변경
         angles += angle.tolist()
         index = estimator.predict([angles])[0]
-        print(gesture[index])
 
         if index in gesture.keys():
             if index != prev_index:
