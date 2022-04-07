@@ -15,5 +15,6 @@ pip install mediapipe
 python main.py
 ```
 
+
 ## :hand: 수어 데이터 셋 
 ![data](https://github.com/hyunmin0317/Sign-Language/blob/main/project/alpha/dataset/alphabet.jpg?raw=true)
